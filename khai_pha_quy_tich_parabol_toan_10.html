@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khám phá Quỹ Tích Parabol - Toán 10 THPT</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow: hidden;
+        }
+
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* Pulse Animations for interactive points */
+        .pulse-point {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.4); opacity: 0.3; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        /* Math Display styling */
+        .math-box {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+        }
+
+        /* Transition effects */
+        .step-transition {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .canvas-grid {
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between bg-slate-950 text-slate-100">
+
+    <!-- HEADER NAVBAR -->
+    <header class="h-14 bg-slate-900/90 border-b border-slate-800 px-4 flex items-center justify-between z-20 backdrop-blur-md">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 bg-gradient-to-tr from-amber-500 to-orange-600 rounded-lg flex items-center justify-center font-extrabold text-white text-lg shadow-lg shadow-amber-500/20">
+                P
+            </div>
+            <div>
+                <h1 class="text-sm md:text-base font-bold text-slate-100 tracking-wide flex items-center gap-2">
+                    KHÁM PHÁ BẢN CHẤT QUỸ TÍCH PARABOL
+                    <span class="text-[10px] uppercase font-semibold bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded border border-blue-500/30">Toán 10 GDPT 2018</span>
+                </h1>
+            </div>
+        </div>
+
+        <!-- 7 Steps Progress Indicator -->
+        <div class="hidden xl:flex items-center space-x-1 bg-slate-950/60 p-1 rounded-xl border border-slate-800 text-xs">
+            <button onclick="goToStep(1)" id="step-btn-1" class="px-2.5 py-1 rounded-lg font-medium transition-all">1. Tình huống</button>
+            <i class="fa-solid fa-chevron-right text-[9px] text-slate-600"></i>
+            <button onclick="goToStep(2)" id="step-btn-2" class="px-2.5 py-1 rounded-lg font-medium transition-all">2. Kéo M</button>
+            <i class="fa-solid fa-chevron-right text-[9px] text-slate-600"></i>
+            <button onclick="goToStep(3)" id="step-btn-3" class="px-2.5 py-1 rounded-lg font-medium transition-all">3. Quét điểm</button>
+            <i class="fa-solid fa-chevron-right text-[9px] text-slate-600"></i>
+            <button onclick="goToStep(4)" id="step-btn-4" class="px-2.5 py-1 rounded-lg font-medium transition-all">4. Quỹ tích</button>
+            <i class="fa-solid fa-chevron-right text-[9px] text-slate-600"></i>
+            <button onclick="goToStep(5)" id="step-btn-5" class="px-2.5 py-1 rounded-lg font-medium transition-all">5. Đối xứng</button>
+            <i class="fa-solid fa-chevron-right text-[9px] text-slate-600"></i>
+            <button onclick="goToStep(6)" id="step-btn-6" class="px-2.5 py-1 rounded-lg font-medium transition-all">6. Đỉnh A</button>
+            <i class="fa-solid fa-chevron-right text-[9px] text-slate-600"></i>
+            <button onclick="goToStep(7)" id="step-btn-7" class="px-2.5 py-1 rounded-lg font-medium transition-all">7. Phương trình</button>
+        </div>
+
+        <!-- Mode Controls -->
+        <div class="flex items-center space-x-2">
+            <button onclick="toggleMode()" id="mode-toggle-btn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-chalkboard-user text-amber-400"></i>
+                <span id="mode-text">Chế độ Học sinh</span>
+            </button>
+            <button onclick="resetAll()" class="px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 text-xs font-semibold rounded-lg border border-rose-800/50 transition flex items-center gap-1">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span class="hidden sm:inline">Đặt lại</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA (3 REGIONS) -->
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-0 overflow-hidden relative">
+
+        <!-- AREA 1: INTERACTIVE SVG GEOMETRY BOARD (Cols 1-7 or 1-8) -->
+        <section class="lg:col-span-7 xl:col-span-8 bg-slate-950 relative flex flex-col justify-between overflow-hidden border-r border-slate-800/80">
+            
+            <!-- Canvas HUD Badges -->
+            <div class="absolute top-3 left-3 z-10 flex flex-wrap gap-2">
+                <div class="bg-slate-900/80 backdrop-blur border border-slate-800 px-3 py-1 rounded-lg text-xs font-medium text-slate-300 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span>Mặt phẳng Oxy</span>
+                </div>
+                <div id="status-hud" class="bg-amber-500/10 backdrop-blur border border-amber-500/30 px-3 py-1 rounded-lg text-xs font-medium text-amber-300">
+                    Bước 1: Quan sát Tiêu điểm F & Đường chuẩn Δ
+                </div>
+            </div>
+
+            <!-- Viewport Controls -->
+            <div class="absolute top-3 right-3 z-10 flex bg-slate-900/80 backdrop-blur border border-slate-800 rounded-lg overflow-hidden text-xs">
+                <button onclick="zoom(1.15)" class="px-2.5 py-1.5 hover:bg-slate-800 text-slate-300 transition" title="Phóng to"><i class="fa-solid fa-plus"></i></button>
+                <div class="w-px bg-slate-800"></div>
+                <button onclick="zoom(0.85)" class="px-2.5 py-1.5 hover:bg-slate-800 text-slate-300 transition" title="Thu nhỏ"><i class="fa-solid fa-minus"></i></button>
+                <div class="w-px bg-slate-800"></div>
+                <button onclick="resetZoom()" class="px-2.5 py-1.5 hover:bg-slate-800 text-slate-300 transition" title="Căn giữa"><i class="fa-solid fa-crosshairs"></i></button>
+            </div>
+
+            <!-- SVG Container -->
+            <div id="svg-wrapper" class="w-full h-full cursor-grab active:cursor-grabbing relative">
+                <svg id="canvas" class="w-full h-full canvas-grid" preserveAspectRatio="xMidYMid meet">
+                    <defs>
+                        <!-- Grid Pattern -->
+                        <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.8" />
+                        </pattern>
+                        <!-- Arrowhead Marker -->
+                        <marker id="axis-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
+                        </marker>
+                    </defs>
+
+                    <!-- Background & Grid -->
+                    <rect width="100%" height="100%" fill="#090d16" />
+                    <rect width="100%" height="100%" fill="url(#grid-pattern)" />
+
+                    <!-- Main Dynamic Scene Group -->
+                    <g id="scene-group">
+                        <!-- Axes -->
+                        <line id="axis-x" x1="-3000" y1="0" x2="3000" y2="0" stroke="#475569" stroke-width="1.8" marker-end="url(#axis-arrow)" />
+                        <line id="axis-y" x1="0" y1="3000" x2="0" y2="-3000" stroke="#475569" stroke-width="1.8" marker-end="url(#axis-arrow)" />
+                        <text x="12" y="-12" fill="#94a3b8" font-size="13" font-weight="bold">y</text>
+                        <text x="350" y="-12" fill="#94a3b8" font-size="13" font-weight="bold">x</text>
+                        <text x="-15" y="18" fill="#64748b" font-size="12">O</text>
+
+                        <!-- Directrix Line Δ -->
+                        <g id="directrix-group">
+                            <line id="directrix-line" stroke="#f43f5e" stroke-width="2.5" stroke-dasharray="6,4" />
+                            <text id="directrix-label" fill="#fda4af" font-size="13" font-weight="bold">Δ: x = -2</text>
+                        </g>
+
+                        <!-- Focus Point F -->
+                        <g id="focus-group">
+                            <circle id="focus-pt" r="6.5" fill="#f59e0b" stroke="#ffffff" stroke-width="2" />
+                            <text id="focus-label" fill="#fbbf24" font-size="13" font-weight="bold" text-anchor="middle" y="-12">F(2,0)</text>
+                        </g>
+
+                        <!-- Vertex Point A (Step 6+) -->
+                        <g id="vertex-group" opacity="0">
+                            <circle id="vertex-pt" r="5.5" fill="#10b981" stroke="#ffffff" stroke-width="2" />
+                            <text id="vertex-label" fill="#34d399" font-size="12" font-weight="bold" text-anchor="middle" y="20">Đỉnh A(0,0)</text>
+                        </g>
+
+                        <!-- Parabola Locus Smooth Curve -->
+                        <path id="parabola-path" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" opacity="0" />
+
+                        <!-- Scanned Points (LocusDots) -->
+                        <g id="scanned-points-group"></g>
+
+                        <!-- Point M Constructs (Rays & Projections) -->
+                        <g id="m-constructs" opacity="0">
+                            <!-- MF Line -->
+                            <line id="line-mf" stroke="#f59e0b" stroke-width="2" />
+                            <!-- MH Line (Perpendicular to Directrix) -->
+                            <line id="line-mh" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4,3" />
+                            <!-- Foot Point H -->
+                            <circle id="foot-h" r="4.5" fill="#38bdf8" />
+                            <text id="label-h" fill="#7dd3fc" font-size="11" font-weight="semibold">H</text>
+                            
+                            <!-- Distance Value Badges -->
+                            <rect id="badge-mf-bg" fill="#0f172a" rx="4" opacity="0.85" />
+                            <text id="badge-mf-txt" fill="#fbbf24" font-size="11" font-weight="bold" text-anchor="middle">MF</text>
+                            
+                            <rect id="badge-mh-bg" fill="#0f172a" rx="4" opacity="0.85" />
+                            <text id="badge-mh-txt" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">MH</text>
+                        </g>
+
+                        <!-- Symmetry Pair Points M1, M2 (Step 5) -->
+                        <g id="symmetry-group" opacity="0">
+                            <line id="line-m1m2" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="3,3" />
+                            <circle id="pt-m1" r="5" fill="#a855f7" stroke="#fff" stroke-width="1.5" />
+                            <circle id="pt-m2" r="5" fill="#a855f7" stroke="#fff" stroke-width="1.5" />
+                            <text id="lbl-m1" fill="#c084fc" font-size="11" font-weight="bold">M1</text>
+                            <text id="lbl-m2" fill="#c084fc" font-size="11" font-weight="bold">M2</text>
+                        </g>
+
+                        <!-- Dragable Point M -->
+                        <g id="point-m-group" class="cursor-grab active:cursor-grabbing" opacity="0">
+                            <circle id="m-pulse" r="14" fill="#3b82f6" opacity="0.3" class="pulse-point" />
+                            <circle id="m-pt" r="7.5" fill="#3b82f6" stroke="#ffffff" stroke-width="2.5" />
+                            <text id="m-label" fill="#93c5fd" font-size="13" font-weight="bold" x="12" y="-12">M(x,y)</text>
+                        </g>
+                    </g>
+                </svg>
+            </div>
+
+            <!-- Bottom Realtime Distance Bar -->
+            <div class="bg-slate-900/90 border-t border-slate-800 p-3 px-5 flex flex-wrap justify-between items-center text-xs text-slate-300 z-10 gap-3 backdrop-blur">
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+                        <span>MF = <strong id="hud-mf-val" class="text-amber-300 font-mono">0.00</strong></span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 rounded-full bg-sky-400 inline-block"></span>
+                        <span>MH = d(M,Δ) = <strong id="hud-mh-val" class="text-sky-300 font-mono">0.00</strong></span>
+                    </div>
+                    <div class="flex items-center space-x-2 bg-slate-950 px-2.5 py-1 rounded border border-slate-800">
+                        <span class="text-slate-400">Độ lệch |MF - MH| =</span>
+                        <strong id="hud-diff-val" class="text-rose-400 font-mono">0.00</strong>
+                    </div>
+                </div>
+
+                <div id="locus-status-badge" class="px-2.5 py-1 rounded text-[11px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                    Chưa kích hoạt quỹ tích
+                </div>
+            </div>
+        </section>
+
+        <!-- AREA 2: PEDAGOGICAL GUIDANCE & STEP-BY-STEP DISCOVERY (Cols 8-12) -->
+        <section class="lg:col-span-5 xl:col-span-4 bg-slate-900 flex flex-col justify-between overflow-hidden z-10">
+            
+            <!-- Step Header Bar -->
+            <div class="bg-slate-950 p-4 border-b border-slate-800 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <span id="step-badge" class="px-2.5 py-1 bg-amber-500 text-slate-950 font-black rounded text-xs uppercase tracking-wider">
+                        Bước 1 / 7
+                    </span>
+                    <h2 id="step-title-text" class="font-bold text-slate-100 text-sm">
+                        Khởi tạo tình huống
+                    </h2>
+                </div>
+                <div class="text-[11px] text-slate-500 font-mono">Quỹ Tích Parabol</div>
+            </div>
+
+            <!-- Dynamic Instructional Content (Scrollable) -->
+            <div id="step-content-container" class="flex-1 p-5 overflow-y-auto space-y-4 text-slate-300 text-xs md:text-sm">
+                <!-- Content dynamically injected here -->
+            </div>
+
+            <!-- Pedagogy Navigation Controls Footer -->
+            <div class="bg-slate-950 border-t border-slate-800 p-4 space-y-3">
+                <div id="step-feedback-box" class="hidden text-xs p-3 rounded-lg border"></div>
+
+                <div class="flex items-center justify-between gap-2">
+                    <button onclick="prevStep()" id="btn-prev-step" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-arrow-left"></i> Trở lại
+                    </button>
+
+                    <button onclick="toggleAutoPlay()" id="btn-auto-play" class="px-3 py-2 bg-indigo-950/50 hover:bg-indigo-900/60 text-indigo-300 text-xs font-semibold rounded-lg border border-indigo-800/50 transition flex items-center gap-1">
+                        <i class="fa-solid fa-play text-indigo-400"></i> <span id="autoplay-text">Tự động</span>
+                    </button>
+
+                    <button onclick="nextStep()" id="btn-next-step" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-lg transition flex items-center gap-1.5 shadow-lg shadow-amber-500/10">
+                        Tiếp theo <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- AREA 3: BOTTOM PARAMETER CONTROLS & ALGEBRA DASHBOARD -->
+    <footer class="bg-slate-900 border-t border-slate-800 text-slate-300 py-2.5 px-5 z-20 text-xs">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            
+            <!-- Parameter Sliders -->
+            <div class="flex items-center space-x-6 flex-wrap gap-y-2">
+                <!-- Parameter p -->
+                <div class="flex items-center space-x-2">
+                    <span class="text-slate-400 font-medium">Tham số p (>0):</span>
+                    <input type="range" id="slider-p" min="1" max="8" step="0.5" value="4" oninput="onParameterPChange(this.value)" class="w-24 accent-amber-500">
+                    <span class="font-mono text-amber-400 font-bold">p = <span id="val-p">4.0</span></span>
+                </div>
+
+                <!-- Orientation Selector -->
+                <div class="flex items-center space-x-2">
+                    <span class="text-slate-400 font-medium">Hướng mở:</span>
+                    <select id="orientation-select" onchange="onOrientationChange(this.value)" class="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded px-2 py-1 focus:outline-none focus:border-amber-500 font-mono">
+                        <option value="right">Sang Phải (y² = 2px)</option>
+                        <option value="left">Sang Trái (y² = -2px)</option>
+                        <option value="up">Hướng Lên (x² = 2py)</option>
+                        <option value="down">Hướng Xuống (x² = -2py)</option>
+                    </select>
+                </div>
+
+                <!-- Equation Status -->
+                <div class="flex items-center space-x-2 bg-slate-950 px-3 py-1 rounded border border-slate-800">
+                    <span class="text-slate-400">Phương trình:</span>
+                    <span id="equation-display" class="font-mono font-bold text-emerald-400">y² = 8x</span>
+                </div>
+            </div>
+
+            <!-- Action Tools -->
+            <div class="flex items-center space-x-3">
+                <button onclick="openCustomParabolaModal()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded border border-slate-700 font-medium transition flex items-center gap-1">
+                    <i class="fa-solid fa-pen-ruler text-amber-400"></i> Tự tạo Parabol
+                </button>
+                <button onclick="openQuizModal()" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded transition flex items-center gap-1 shadow">
+                    <i class="fa-solid fa-graduation-cap"></i> Mini Quiz (6 câu)
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL 1: CUSTOM PARABOLA INPUT -->
+    <div id="modal-custom" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-amber-400"></i> TỰ TẠO PARABOL TÙY CHỌN
+                </h3>
+                <button onclick="closeModal('modal-custom')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-slate-400">Nhập tiêu điểm F(x_F, y_F) và đường chuẩn Δ để hệ thống tự động quét quỹ tích:</p>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Tiêu điểm F_x:</label>
+                    <input type="number" id="custom-fx" value="3" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 font-mono">
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Tiêu điểm F_y:</label>
+                    <input type="number" id="custom-fy" value="0" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 font-mono">
+                </div>
+            </div>
+            <div class="text-xs">
+                <label class="block text-slate-300 font-semibold mb-1">Đường chuẩn Δ (x = k hoặc y = k):</label>
+                <div class="flex gap-2">
+                    <select id="custom-dir-type" class="bg-slate-950 border border-slate-700 text-slate-200 rounded px-2 py-1.5 font-mono">
+                        <option value="x">x =</option>
+                        <option value="y">y =</option>
+                    </select>
+                    <input type="number" id="custom-dir-val" value="-3" class="flex-1 bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 font-mono">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeModal('modal-custom')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded text-xs font-semibold">Hủy</button>
+                <button onclick="applyCustomParabola()" class="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded text-xs">Tạo Quỹ Tích</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: MINI QUIZ -->
+    <div id="modal-quiz" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full p-6 space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-question text-amber-400"></i> MINI QUIZ: CỦNG CỐ BẢN CHẤT PARABOL
+                </h3>
+                <button onclick="closeModal('modal-quiz')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="quiz-body" class="flex-1 overflow-y-auto space-y-4 pr-1">
+                <!-- Quiz items injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * PARABOLA LOCUS TEACHING ENGINE
+         * Single-file standalone interactive app.
+         * Pure JS + SVG Rendering engine.
+         */
+
+        // Application State
+        const state = {
+            step: 1,
+            mode: 'student', // 'student' or 'teacher'
+            p: 4.0,
+            orientation: 'right', // 'right', 'left', 'up', 'down'
+            fx: 2.0,
+            fy: 0.0,
+            directrixType: 'x', // 'x' or 'y'
+            directrixVal: -2.0,
+            mX: 3.0,
+            mY: 4.0,
+            scale: 35, // 1 unit = 35px
+            panX: 0,
+            panY: 0,
+            zoomLevel: 1.0,
+            scannedPoints: [],
+            scanCount: 100,
+            showParabolaCurve: false,
+            isAutoPlaying: false,
+            autoPlayTimer: null,
+            algebraStep: 0,
+            quizScores: {}
+        };
+
+        // DOM Element Cache
+        const svg = document.getElementById('canvas');
+        const sceneGroup = document.getElementById('scene-group');
+
+        // Initialize App
+        window.addEventListener('load', () => {
+            initCenterPan();
+            updateCalculatedParams();
+            renderStepUI();
+            setupDragInteractions();
+            renderScene();
+            initQuizData();
+
+            window.addEventListener('resize', () => {
+                initCenterPan();
+                renderScene();
+            });
+        });
+
+        function initCenterPan() {
+            const wrapper = document.getElementById('svg-wrapper');
+            const rect = wrapper.getBoundingClientRect();
+            state.panX = rect.width / 2;
+            state.panY = rect.height / 2;
+        }
+
+        // Coordinate Transformation (Math <-> SVG)
+        function mathToSvg(x, y) {
+            const svgX = state.panX + (x * state.scale * state.zoomLevel);
+            const svgY = state.panY - (y * state.scale * state.zoomLevel); // Invert Y
+            return { x: svgX, y: svgY };
+        }
+
+        function svgToMath(svgX, svgY) {
+            const x = (svgX - state.panX) / (state.scale * state.zoomLevel);
+            const y = (state.panY - svgY) / (state.scale * state.zoomLevel);
+            return { x, y };
+        }
+
+        // Parameter Calculation based on orientation & p
+        function updateCalculatedParams() {
+            const p = state.p;
+            if (state.orientation === 'right') {
+                state.fx = p / 2;
+                state.fy = 0;
+                state.directrixType = 'x';
+                state.directrixVal = -p / 2;
+            } else if (state.orientation === 'left') {
+                state.fx = -p / 2;
+                state.fy = 0;
+                state.directrixType = 'x';
+                state.directrixVal = p / 2;
+            } else if (state.orientation === 'up') {
+                state.fx = 0;
+                state.fy = p / 2;
+                state.directrixType = 'y';
+                state.directrixVal = -p / 2;
+            } else if (state.orientation === 'down') {
+                state.fx = 0;
+                state.fy = -p / 2;
+                state.directrixType = 'y';
+                state.directrixVal = p / 2;
+            }
+
+            // Update UI elements
+            document.getElementById('val-p').innerText = p.toFixed(1);
+            document.getElementById('slider-p').value = p;
+            
+            // Equation string update
+            let eqStr = "";
+            if (state.orientation === 'right') eqStr = `y² = ${(2*p).toFixed(1)}x`;
+            else if (state.orientation === 'left') eqStr = `y² = -${(2*p).toFixed(1)}x`;
+            else if (state.orientation === 'up') eqStr = `x² = ${(2*p).toFixed(1)}y`;
+            else if (state.orientation === 'down') eqStr = `x² = -${(2*p).toFixed(1)}y`;
+
+            document.getElementById('equation-display').innerText = eqStr;
+        }
+
+        // Main Scene Renderer
+        function renderScene() {
+            // 1. Directrix Line Δ & Label
+            const dirLine = document.getElementById('directrix-line');
+            const dirLbl = document.getElementById('directrix-label');
+
+            if (state.directrixType === 'x') {
+                const p1 = mathToSvg(state.directrixVal, -100);
+                const p2 = mathToSvg(state.directrixVal, 100);
+                dirLine.setAttribute('x1', p1.x); dirLine.setAttribute('y1', p1.y);
+                dirLine.setAttribute('x2', p2.x); dirLine.setAttribute('y2', p2.y);
+
+                const lblPos = mathToSvg(state.directrixVal, 6);
+                dirLbl.setAttribute('x', lblPos.x - 15);
+                dirLbl.setAttribute('y', lblPos.y);
+                dirLbl.textContent = `Δ: x = ${state.directrixVal.toFixed(1)}`;
+            } else {
+                const p1 = mathToSvg(-100, state.directrixVal);
+                const p2 = mathToSvg(100, state.directrixVal);
+                dirLine.setAttribute('x1', p1.x); dirLine.setAttribute('y1', p1.y);
+                dirLine.setAttribute('x2', p2.x); dirLine.setAttribute('y2', p2.y);
+
+                const lblPos = mathToSvg(6, state.directrixVal);
+                dirLbl.setAttribute('x', lblPos.x);
+                dirLbl.setAttribute('y', lblPos.y + 15);
+                dirLbl.textContent = `Δ: y = ${state.directrixVal.toFixed(1)}`;
+            }
+
+            // 2. Focus Point F
+            const fPos = mathToSvg(state.fx, state.fy);
+            document.getElementById('focus-pt').setAttribute('cx', fPos.x);
+            document.getElementById('focus-pt').setAttribute('cy', fPos.y);
+            
+            const fLbl = document.getElementById('focus-label');
+            fLbl.setAttribute('x', fPos.x);
+            fLbl.setAttribute('y', fPos.y - 12);
+            fLbl.textContent = `F(${state.fx.toFixed(1)}, ${state.fy.toFixed(1)})`;
+
+            // 3. Point M and Construct Lines
+            const mPos = mathToSvg(state.mX, state.mY);
+            document.getElementById('m-pt').setAttribute('cx', mPos.x);
+            document.getElementById('m-pt').setAttribute('cy', mPos.y);
+            document.getElementById('m-pulse').setAttribute('cx', mPos.x);
+            document.getElementById('m-pulse').setAttribute('cy', mPos.y);
+
+            const mLbl = document.getElementById('m-label');
+            mLbl.setAttribute('x', mPos.x + 12);
+            mLbl.setAttribute('y', mPos.y - 12);
+            mLbl.textContent = `M(${state.mX.toFixed(2)}, ${state.mY.toFixed(2)})`;
+
+            // Calculate Foot H and Distances
+            let hX = 0, hY = 0;
+            if (state.directrixType === 'x') {
+                hX = state.directrixVal;
+                hY = state.mY;
+            } else {
+                hX = state.mX;
+                hY = state.directrixVal;
+            }
+
+            const hPos = mathToSvg(hX, hY);
+            document.getElementById('foot-h').setAttribute('cx', hPos.x);
+            document.getElementById('foot-h').setAttribute('cy', hPos.y);
+            document.getElementById('label-h').setAttribute('x', hPos.x - 12);
+            document.getElementById('label-h').setAttribute('y', hPos.y - 8);
+
+            // MF and MH Construct lines
+            document.getElementById('line-mf').setAttribute('x1', mPos.x);
+            document.getElementById('line-mf').setAttribute('y1', mPos.y);
+            document.getElementById('line-mf').setAttribute('x2', fPos.x);
+            document.getElementById('line-mf').setAttribute('y2', fPos.y);
+
+            document.getElementById('line-mh').setAttribute('x1', mPos.x);
+            document.getElementById('line-mh').setAttribute('y1', mPos.y);
+            document.getElementById('line-mh').setAttribute('x2', hPos.x);
+            document.getElementById('line-mh').setAttribute('y2', hPos.y);
+
+            // Compute Exact Math Distances
+            const distMF = Math.hypot(state.mX - state.fx, state.mY - state.fy);
+            const distMH = (state.directrixType === 'x') ? Math.abs(state.mX - state.directrixVal) : Math.abs(state.mY - state.directrixVal);
+            const diff = Math.abs(distMF - distMH);
+
+            // Distance HUD Update
+            document.getElementById('hud-mf-val').innerText = distMF.toFixed(2);
+            document.getElementById('hud-mh-val').innerText = distMH.toFixed(2);
+            document.getElementById('hud-diff-val').innerText = diff.toFixed(2);
+
+            // Locus match status badge
+            const statusBadge = document.getElementById('locus-status-badge');
+            const isMatch = diff < 0.08; // Numerical tolerance epsilon
+
+            if (state.step >= 2) {
+                if (isMatch) {
+                    statusBadge.className = "px-2.5 py-1 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+                    statusBadge.innerText = "✓ THỎA MÃN MF = d(M,Δ)";
+                } else {
+                    statusBadge.className = "px-2.5 py-1 rounded text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40";
+                    statusBadge.innerText = "✕ CHƯA THỎA MÃN (MF ≠ MH)";
+                }
+            }
+
+            // Ray Label positions
+            const midMF = { x: (mPos.x + fPos.x)/2, y: (mPos.y + fPos.y)/2 };
+            const midMH = { x: (mPos.x + hPos.x)/2, y: (mPos.y + hPos.y)/2 };
+
+            setLabelBadge('badge-mf-bg', 'badge-mf-txt', midMF.x, midMF.y - 10, distMF.toFixed(2));
+            setLabelBadge('badge-mh-bg', 'badge-mh-txt', midMH.x, midMH.y - 10, distMH.toFixed(2));
+
+            // Vertex A (Step 6+)
+            const vPos = mathToSvg(0, 0);
+            document.getElementById('vertex-pt').setAttribute('cx', vPos.x);
+            document.getElementById('vertex-pt').setAttribute('cy', vPos.y);
+            document.getElementById('vertex-label').setAttribute('x', vPos.x);
+            document.getElementById('vertex-label').setAttribute('y', vPos.y + 20);
+
+            // Render Parabola Smooth Curve
+            renderParabolaCurve();
+
+            // Render Scanned Locus Points
+            renderScannedPoints();
+
+            // Render Symmetry Pair (Step 5)
+            renderSymmetryPoints();
+        }
+
+        function setLabelBadge(bgId, txtId, x, y, text) {
+            const txt = document.getElementById(txtId);
+            const bg = document.getElementById(bgId);
+            txt.setAttribute('x', x);
+            txt.setAttribute('y', y);
+            txt.textContent = text;
+            
+            // Adjust background rect size dynamically
+            const width = text.length * 7 + 10;
+            bg.setAttribute('x', x - width/2);
+            bg.setAttribute('y', y - 12);
+            bg.setAttribute('width', width);
+            bg.setAttribute('height', 16);
+        }
+
+        function renderParabolaCurve() {
+            const path = document.getElementById('parabola-path');
+            if (!state.showParabolaCurve) {
+                path.setAttribute('opacity', '0');
+                return;
+            }
+            path.setAttribute('opacity', '1');
+
+            const p = state.p;
+            let pathD = "";
+            const tMax = 12;
+            const step = 0.15;
+
+            for (let t = -tMax; t <= tMax; t += step) {
+                let x = 0, y = 0;
+                if (state.orientation === 'right') {
+                    x = (t * t) / (2 * p);
+                    y = t;
+                } else if (state.orientation === 'left') {
+                    x = -(t * t) / (2 * p);
+                    y = t;
+                } else if (state.orientation === 'up') {
+                    x = t;
+                    y = (t * t) / (2 * p);
+                } else if (state.orientation === 'down') {
+                    x = t;
+                    y = -(t * t) / (2 * p);
+                }
+
+                const pos = mathToSvg(x, y);
+                if (pathD === "") pathD += `M ${pos.x} ${pos.y}`;
+                else pathD += ` L ${pos.x} ${pos.y}`;
+            }
+
+            path.setAttribute('d', pathD);
+        }
+
+        function generateScannedLocusPoints() {
+            state.scannedPoints = [];
+            const count = state.scanCount;
+            const p = state.p;
+
+            for (let i = 0; i < count; i++) {
+                const t = (Math.random() - 0.5) * 16;
+                let x = 0, y = 0;
+
+                if (state.orientation === 'right') {
+                    x = (t * t) / (2 * p); y = t;
+                } else if (state.orientation === 'left') {
+                    x = -(t * t) / (2 * p); y = t;
+                } else if (state.orientation === 'up') {
+                    x = t; y = (t * t) / (2 * p);
+                } else if (state.orientation === 'down') {
+                    x = t; y = -(t * t) / (2 * p);
+                }
+
+                // Small noise for realistic locus discovery
+                x += (Math.random() - 0.5) * 0.08;
+                y += (Math.random() - 0.5) * 0.08;
+
+                state.scannedPoints.push({ x, y });
+            }
+            renderScannedPoints();
+        }
+
+        function renderScannedPoints() {
+            const group = document.getElementById('scanned-points-group');
+            group.innerHTML = "";
+
+            if (state.step < 3 || state.scannedPoints.length === 0) return;
+
+            state.scannedPoints.forEach(pt => {
+                const pos = mathToSvg(pt.x, pt.y);
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute('cx', pos.x);
+                circle.setAttribute('cy', pos.y);
+                circle.setAttribute('r', '2.5');
+                circle.setAttribute('fill', '#38bdf8');
+                circle.setAttribute('opacity', '0.8');
+                group.appendChild(circle);
+            });
+        }
+
+        function renderSymmetryPoints() {
+            const group = document.getElementById('symmetry-group');
+            if (state.step !== 5) {
+                group.setAttribute('opacity', '0');
+                return;
+            }
+            group.setAttribute('opacity', '1');
+
+            // Pair symmetric points M1 and M2 across axis
+            let m1X = state.mX, m1Y = Math.abs(state.mY);
+            let m2X = state.mX, m2Y = -Math.abs(state.mY);
+
+            if (state.orientation === 'up' || state.orientation === 'down') {
+                m1X = Math.abs(state.mX); m1Y = state.mY;
+                m2X = -Math.abs(state.mX); m2Y = state.mY;
+            }
+
+            const pos1 = mathToSvg(m1X, m1Y);
+            const pos2 = mathToSvg(m2X, m2Y);
+
+            document.getElementById('pt-m1').setAttribute('cx', pos1.x);
+            document.getElementById('pt-m1').setAttribute('cy', pos1.y);
+            document.getElementById('lbl-m1').setAttribute('x', pos1.x + 8);
+            document.getElementById('lbl-m1').setAttribute('y', pos1.y - 8);
+
+            document.getElementById('pt-m2').setAttribute('cx', pos2.x);
+            document.getElementById('pt-m2').setAttribute('cy', pos2.y);
+            document.getElementById('lbl-m2').setAttribute('x', pos2.x + 8);
+            document.getElementById('lbl-m2').setAttribute('y', pos2.y + 15);
+
+            document.getElementById('line-m1m2').setAttribute('x1', pos1.x);
+            document.getElementById('line-m1m2').setAttribute('y1', pos1.y);
+            document.getElementById('line-m1m2').setAttribute('x2', pos2.x);
+            document.getElementById('line-m1m2').setAttribute('y2', pos2.y);
+        }
+
+        // Mouse Drag Controls
+        function setupDragInteractions() {
+            let isDragging = false;
+            let dragType = null;
+            let startSvgX = 0, startSvgY = 0;
+
+            const mGroup = document.getElementById('point-m-group');
+
+            mGroup.addEventListener('pointerdown', (e) => {
+                isDragging = true;
+                dragType = 'M';
+                mGroup.setPointerCapture(e.pointerId);
+                e.stopPropagation();
+            });
+
+            svg.addEventListener('pointerdown', (e) => {
+                if (e.target === svg || e.target.tagName === 'rect') {
+                    isDragging = true;
+                    dragType = 'PAN';
+                    startSvgX = e.clientX - state.panX;
+                    startSvgY = e.clientY - state.panY;
+                }
+            });
+
+            window.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+
+                const rect = svg.getBoundingClientRect();
+                const mouseSvgX = e.clientX - rect.left;
+                const mouseSvgY = e.clientY - rect.top;
+
+                if (dragType === 'M') {
+                    const mathPos = svgToMath(mouseSvgX, mouseSvgY);
+                    state.mX = Math.max(-15, Math.min(15, mathPos.x));
+                    state.mY = Math.max(-12, Math.min(12, mathPos.y));
+                    renderScene();
+                } else if (dragType === 'PAN') {
+                    state.panX = e.clientX - startSvgX;
+                    state.panY = e.clientY - startSvgY;
+                    renderScene();
+                }
+            });
+
+            window.addEventListener('pointerup', () => {
+                isDragging = false;
+                dragType = null;
+            });
+        }
+
+        function zoom(factor) {
+            state.zoomLevel *= factor;
+            state.zoomLevel = Math.max(0.4, Math.min(2.5, state.zoomLevel));
+            renderScene();
+        }
+
+        function resetZoom() {
+            state.zoomLevel = 1.0;
+            initCenterPan();
+            renderScene();
+        }
+
+        // Step Navigation Controller
+        function goToStep(step) {
+            state.step = step;
+
+            // Highlight Step Header Nav buttons
+            for (let i = 1; i <= 7; i++) {
+                const btn = document.getElementById(`step-btn-${i}`);
+                if (btn) {
+                    if (i === step) {
+                        btn.className = "px-2.5 py-1 rounded-lg font-bold bg-amber-500 text-slate-950 shadow transition-all";
+                    } else if (i < step) {
+                        btn.className = "px-2.5 py-1 rounded-lg font-medium bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 transition-all";
+                    } else {
+                        btn.className = "px-2.5 py-1 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all";
+                    }
+                }
+            }
+
+            // Element visibility mapping based on step
+            const mConstructs = document.getElementById('m-constructs');
+            const mGroup = document.getElementById('point-m-group');
+            const vertexGroup = document.getElementById('vertex-group');
+            const hud = document.getElementById('status-hud');
+
+            if (step === 1) {
+                mConstructs.setAttribute('opacity', '0');
+                mGroup.setAttribute('opacity', '0');
+                vertexGroup.setAttribute('opacity', '0');
+                state.showParabolaCurve = false;
+                hud.textContent = "Bước 1: Quan sát Tiêu điểm F & Đường chuẩn Δ";
+            } else if (step === 2) {
+                mConstructs.setAttribute('opacity', '1');
+                mGroup.setAttribute('opacity', '1');
+                vertexGroup.setAttribute('opacity', '0');
+                state.showParabolaCurve = false;
+                hud.textContent = "Bước 2: Kéo M tự do & Quan sát MF vs MH = d(M,Δ)";
+            } else if (step === 3) {
+                mConstructs.setAttribute('opacity', '1');
+                mGroup.setAttribute('opacity', '1');
+                vertexGroup.setAttribute('opacity', '0');
+                state.showParabolaCurve = false;
+                if (state.scannedPoints.length === 0) generateScannedLocusPoints();
+                hud.textContent = "Bước 3: Quét các điểm M thỏa mãn MF = d(M,Δ)";
+            } else if (step === 4) {
+                mConstructs.setAttribute('opacity', '1');
+                mGroup.setAttribute('opacity', '1');
+                vertexGroup.setAttribute('opacity', '0');
+                state.showParabolaCurve = true;
+                hud.textContent = "Bước 4: Nối các điểm hình thành QUỸ TÍCH PARABOL";
+            } else if (step === 5) {
+                mConstructs.setAttribute('opacity', '1');
+                mGroup.setAttribute('opacity', '1');
+                vertexGroup.setAttribute('opacity', '0');
+                state.showParabolaCurve = true;
+                hud.textContent = "Bước 5: Khám phá Tính Đối Xứng của Parabol";
+            } else if (step === 6) {
+                mConstructs.setAttribute('opacity', '1');
+                mGroup.setAttribute('opacity', '1');
+                vertexGroup.setAttribute('opacity', '1');
+                state.showParabolaCurve = true;
+                hud.textContent = "Bước 6: Khám phá Đỉnh A và khoảng cách AF = d(A,Δ)";
+            } else if (step === 7) {
+                mConstructs.setAttribute('opacity', '1');
+                mGroup.setAttribute('opacity', '1');
+                vertexGroup.setAttribute('opacity', '1');
+                state.showParabolaCurve = true;
+                hud.textContent = "Bước 7: Suy luận Phương Trình Chính Tắc y² = 2px";
+            }
+
+            renderStepUI();
+            renderScene();
+        }
+
+        function prevStep() {
+            if (state.step > 1) goToStep(state.step - 1);
+        }
+
+        function nextStep() {
+            if (state.step < 7) goToStep(state.step + 1);
+        }
+
+        // Render Sidebar Pedagogy Content
+        function renderStepUI() {
+            const container = document.getElementById('step-content-container');
+            const stepBadge = document.getElementById('step-badge');
+            const stepTitle = document.getElementById('step-title-text');
+
+            stepBadge.textContent = `Bước ${state.step} / 7`;
+
+            document.getElementById('btn-prev-step').disabled = (state.step === 1);
+            document.getElementById('btn-next-step').disabled = (state.step === 7);
+
+            let html = "";
+
+            switch (state.step) {
+                case 1:
+                    stepTitle.textContent = "Khởi tạo tình huống & Đặt vấn đề";
+                    html = `
+                        <div class="space-y-3">
+                            <p class="leading-relaxed">
+                                Trong mặt phẳng Oxy, ta cho sẵn một điểm cố định <strong class="text-amber-400">F(2, 0)</strong> và một đường thẳng cố định <strong class="text-rose-400">Δ: x = -2</strong>.
+                            </p>
+                            <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl space-y-1">
+                                <span class="text-amber-400 font-bold block text-xs">❓ ĐẶT VẤN ĐỀ TÌM QUỸ TÍCH:</span>
+                                <p class="text-slate-300 text-xs">
+                                    "Liệu ta có thể tìm được những điểm M(x, y) trên mặt phẳng sao cho khoảng cách từ M đến tiêu điểm F luôn <strong>BẰNG</strong> khoảng cách từ M đến đường thẳng Δ không?"
+                                </p>
+                            </div>
+                            <div class="p-3 bg-indigo-950/30 border border-indigo-800/40 rounded-xl text-xs text-indigo-300">
+                                💡 <strong>Nguyên tắc sư phạm:</strong> Đường cong Parabol chưa hề được vẽ sẵn. Hãy từng bước khám phá tập hợp các điểm này!
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 2:
+                    stepTitle.textContent = "Kéo thả M tự do & Quan sát khoảng cách";
+                    html = `
+                        <div class="space-y-3">
+                            <p class="leading-relaxed">
+                                Bây giờ điểm <strong>M(x, y)</strong> đã xuất hiện. Em hãy <strong>dùng chuột kéo thả M</strong> khắp mặt phẳng Oxy và quan sát bảng số liệu khoảng cách:
+                            </p>
+                            <div class="grid grid-cols-2 gap-2 text-center text-xs">
+                                <div class="p-2.5 bg-amber-950/30 border border-amber-800/40 rounded-lg">
+                                    <span class="text-slate-400 block">Khoảng cách MF</span>
+                                    <strong id="ui-mf" class="text-amber-400 font-mono text-sm">${Math.hypot(state.mX - state.fx, state.mY - state.fy).toFixed(2)}</strong>
+                                </div>
+                                <div class="p-2.5 bg-sky-950/30 border border-sky-800/40 rounded-lg">
+                                    <span class="text-slate-400 block">Khoảng cách MH = d(M,Δ)</span>
+                                    <strong id="ui-mh" class="text-sky-400 font-mono text-sm">${Math.abs(state.mX - state.directrixVal).toFixed(2)}</strong>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl space-y-2">
+                                <span class="font-bold text-slate-200 text-xs">❓ Câu hỏi tương tác:</span>
+                                <p class="text-slate-300 text-xs">Ở hầu hết các vị trí tự do, MF có bằng d(M,Δ) không?</p>
+                                <div class="flex gap-2">
+                                    <button onclick="answerStep2(true)" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-slate-200 font-semibold text-xs transition">Có, bằng nhau</button>
+                                    <button onclick="answerStep2(false)" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-slate-200 font-semibold text-xs transition">Không, khác nhau</button>
+                                </div>
+                                <div id="q2-fb" class="hidden text-xs pt-1 font-medium"></div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 3:
+                    stepTitle.textContent = "Quét & Tìm tập hợp điểm thỏa mãn";
+                    html = `
+                        <div class="space-y-3">
+                            <p class="leading-relaxed">
+                                Ta tiến hành quét tự động trên mặt phẳng Oxy. Các điểm M thỏa mãn điều kiện <strong class="text-emerald-400">MF ≈ d(M,Δ)</strong> sẽ được đánh dấu bằng chấm màu xanh!
+                            </p>
+
+                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="font-semibold text-slate-300">Số điểm khảo sát:</span>
+                                    <span class="font-mono font-bold text-amber-400" id="scan-count-lbl">${state.scanCount} điểm</span>
+                                </div>
+                                <input type="range" min="10" max="500" step="10" value="${state.scanCount}" oninput="state.scanCount=parseInt(this.value); document.getElementById('scan-count-lbl').innerText=this.value+' điểm'; generateScannedLocusPoints();" class="w-full accent-amber-500">
+                            </div>
+
+                            <button onclick="generateScannedLocusPoints()" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg transition shadow text-xs flex justify-center items-center gap-1.5">
+                                <i class="fa-solid fa-radar"></i> Quét lại vị trí các điểm
+                            </button>
+
+                            <p class="text-[11px] text-slate-400 italic">
+                                💡 Nhận xét: Khi tăng số lượng điểm từ 10 → 100 → 500 điểm, tập hợp các chấm xanh dần phát lộ một dạng đường cong kỳ diệu!
+                            </p>
+                        </div>
+                    `;
+                    break;
+
+                case 4:
+                    stepTitle.textContent = "Hình thành Quỹ Tích Parabol";
+                    html = `
+                        <div class="space-y-3">
+                            <p class="leading-relaxed">
+                                Khi nối liền mịn tất cả các điểm thỏa mãn điều kiện <strong class="text-amber-400">MF = d(M,Δ)</strong>, ta thu được đường cong mượt hoàn chỉnh!
+                            </p>
+
+                            <div class="p-3.5 bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border border-blue-500/30 rounded-xl space-y-1.5">
+                                <span class="text-amber-400 font-bold uppercase tracking-wider text-[11px] block">Định nghĩa Quỹ Tích Parabol:</span>
+                                <p class="text-slate-100 font-medium text-xs leading-relaxed">
+                                    Parabol là tập hợp tất cả các điểm M trong mặt phẳng cách đều một điểm cố định F (gọi là <strong>Tiêu điểm</strong>) và một đường thẳng cố định Δ (gọi là <strong>Đường chuẩn</strong>).
+                                </p>
+                            </div>
+
+                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs space-y-1">
+                                <div class="flex justify-between"><span class="text-slate-400">Điểm F:</span><strong class="text-amber-400">Tiêu điểm (Focus)</strong></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Đường thẳng Δ:</span><strong class="text-rose-400">Đường chuẩn (Directrix)</strong></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Khoảng cách p = d(F,Δ):</span><strong class="text-emerald-400">Tham số tiêu</strong></div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 5:
+                    stepTitle.textContent = "Khám phá Tính Đối Xứng";
+                    html = `
+                        <div class="space-y-3">
+                            <p class="leading-relaxed">
+                                Quan sát cặp điểm tím <strong class="text-purple-400">M1</strong> và <strong class="text-purple-400">M2</strong> đối xứng nhau qua trục hoành Ox (y = 0).
+                            </p>
+                            <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl space-y-2 text-xs">
+                                <p class="text-slate-300">
+                                    Nhận xét: Vì <span class="font-mono">M1F = M2F</span> và <span class="font-mono">d(M1,Δ) = d(M2,Δ)</span>, nên nếu M1 thuộc parabol thì M2 cũng thuộc parabol.
+                                </p>
+                                <div class="p-2 bg-purple-950/30 border border-purple-800/40 rounded text-purple-300 font-bold text-center">
+                                    Trục Ox (y=0) là Trục Đối Xứng của Parabol
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 6:
+                    stepTitle.textContent = "Khám phá Đỉnh A của Parabol";
+                    html = `
+                        <div class="space-y-3">
+                            <p class="leading-relaxed">
+                                Giao điểm giữa Parabol và Trục đối xứng được gọi là <strong class="text-emerald-400">ĐỈNH A</strong> của parabol.
+                            </p>
+                            <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl space-y-2 text-xs">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-400">Khoảng cách AF:</span>
+                                    <strong class="text-amber-400 font-mono">AF = p/2 = ${(state.p/2).toFixed(1)}</strong>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-400">Khoảng cách d(A,Δ):</span>
+                                    <strong class="text-sky-400 font-mono">d(A,Δ) = p/2 = ${(state.p/2).toFixed(1)}</strong>
+                                </div>
+                                <p class="text-emerald-300 font-medium pt-1 border-t border-slate-800">
+                                    ⇒ Đỉnh A(0,0) chính là <strong>Trung điểm</strong> của đoạn thẳng vuông góc kẻ từ Tiêu điểm F đến Đường chuẩn Δ!
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 7:
+                    stepTitle.textContent = "Suy luận Phương trình Đại số";
+                    html = `
+                        <div class="space-y-3">
+                            <p class="leading-relaxed text-xs">
+                                Từ điều kiện hình học <span class="font-mono font-bold text-amber-400">MF = d(M,Δ)</span>, chọn hệ tọa độ Oxy sao cho $F(p/2, 0)$ và $\\Delta: x = -p/2$.
+                            </p>
+
+                            <!-- Algebra Step Screen -->
+                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono text-xs space-y-2">
+                                <div class="flex justify-between text-[11px] text-slate-500 font-sans border-b border-slate-800 pb-1">
+                                    <span>Biến đổi Đại số:</span>
+                                    <span class="text-amber-400">Bước ${state.algebraStep + 1} / 4</span>
+                                </div>
+                                <div id="algebra-step-content" class="text-slate-200 py-1">
+                                    ${getAlgebraStepHtml(state.algebraStep)}
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2">
+                                <button onclick="prevAlgebraStep()" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded transition">Lùi lại</button>
+                                <button onclick="nextAlgebraStep()" class="flex-1 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded transition">Bước tiếp theo</button>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function answerStep2(isEqual) {
+            const fb = document.getElementById('q2-fb');
+            fb.classList.remove('hidden');
+            if (!isEqual) {
+                fb.className = "text-xs p-2 rounded bg-emerald-950/40 border border-emerald-800/50 text-emerald-300 mt-2";
+                fb.innerHTML = "✓ <strong>Chính xác!</strong> M di chuyển tự do thì MF ≠ d(M,Δ). Ta phải tìm những vị trí đặc biệt mà hai khoảng cách này BẰNG NHAU!";
+            } else {
+                fb.className = "text-xs p-2 rounded bg-rose-950/40 border border-rose-800/50 text-rose-300 mt-2";
+                fb.innerHTML = "✕ <strong>Chưa chính xác!</strong> Hãy nhìn bảng số liệu khoảng cách ở góc dưới khi kéo M, em sẽ thấy chúng thường xuyên lệch nhau!";
+            }
+        }
+
+        function getAlgebraStepHtml(step) {
+            switch(step) {
+                case 0:
+                    return `
+                        <p class="text-amber-400 font-bold">1. Tọa độ hóa & Khoảng cách:</p>
+                        <p>M(x,y), F(p/2, 0), H(-p/2, y)</p>
+                        <p>MF = √[(x - p/2)² + y²]</p>
+                        <p>d(M,Δ) = |x + p/2|</p>
+                    `;
+                case 1:
+                    return `
+                        <p class="text-amber-400 font-bold">2. Lập đẳng thức MF = d(M,Δ):</p>
+                        <p>√[(x - p/2)² + y²] = |x + p/2|</p>
+                    `;
+                case 2:
+                    return `
+                        <p class="text-amber-400 font-bold">3. Bình phương 2 vế & Khai triển:</p>
+                        <p>(x - p/2)² + y² = (x + p/2)²</p>
+                        <p>⇒ x² - px + p²/4 + y² = x² + px + p²/4</p>
+                    `;
+                case 3:
+                    return `
+                        <p class="text-amber-400 font-bold">4. Rút gọn thu được PT CHÍNH TẮC:</p>
+                        <p class="text-base text-amber-300 text-center py-2 bg-slate-900 border border-amber-500/30 rounded my-1 font-bold">y² = 2px</p>
+                        <p class="text-[11px] text-slate-400 text-center">(Phương trình được suy ra hoàn toàn từ Quỹ Tích!)</p>
+                    `;
+            }
+        }
+
+        function prevAlgebraStep() {
+            if (state.algebraStep > 0) {
+                state.algebraStep--;
+                renderStepUI();
+            }
+        }
+
+        function nextAlgebraStep() {
+            if (state.algebraStep < 3) {
+                state.algebraStep++;
+                renderStepUI();
+            }
+        }
+
+        // Parameter Sliders & Orientation Callbacks
+        function onParameterPChange(val) {
+            state.p = parseFloat(val);
+            updateCalculatedParams();
+            if (state.scannedPoints.length > 0) generateScannedLocusPoints();
+            renderScene();
+        }
+
+        function onOrientationChange(val) {
+            state.orientation = val;
+            updateCalculatedParams();
+            if (state.scannedPoints.length > 0) generateScannedLocusPoints();
+            renderScene();
+        }
+
+        function toggleMode() {
+            state.mode = (state.mode === 'student') ? 'teacher' : 'student';
+            const text = document.getElementById('mode-text');
+            const btn = document.getElementById('mode-toggle-btn');
+
+            if (state.mode === 'teacher') {
+                text.innerText = "Chế độ Trình chiếu (GV)";
+                btn.className = "px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-lg transition flex items-center gap-1.5 shadow";
+            } else {
+                text.innerText = "Chế độ Học sinh";
+                btn.className = "px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition flex items-center gap-1.5";
+            }
+        }
+
+        function toggleAutoPlay() {
+            state.isAutoPlaying = !state.isAutoPlaying;
+            const text = document.getElementById('autoplay-text');
+
+            if (state.isAutoPlaying) {
+                text.innerText = "Dừng lại";
+                state.autoPlayTimer = setInterval(() => {
+                    if (state.step < 7) goToStep(state.step + 1);
+                    else {
+                        clearInterval(state.autoPlayTimer);
+                        state.isAutoPlaying = false;
+                        text.innerText = "Tự động";
+                    }
+                }, 3500);
+            } else {
+                text.innerText = "Tự động";
+                clearInterval(state.autoPlayTimer);
+            }
+        }
+
+        function resetAll() {
+            state.p = 4.0;
+            state.orientation = 'right';
+            state.mX = 3.0;
+            state.mY = 4.0;
+            state.scannedPoints = [];
+            state.algebraStep = 0;
+            document.getElementById('orientation-select').value = 'right';
+            updateCalculatedParams();
+            goToStep(1);
+        }
+
+        // Modals Logic
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function openCustomParabolaModal() { openModal('modal-custom'); }
+        function applyCustomParabola() {
+            const fx = parseFloat(document.getElementById('custom-fx').value);
+            const fy = parseFloat(document.getElementById('custom-fy').value);
+            const dirType = document.getElementById('custom-dir-type').value;
+            const dirVal = parseFloat(document.getElementById('custom-dir-val').value);
+
+            state.fx = fx;
+            state.fy = fy;
+            state.directrixType = dirType;
+            state.directrixVal = dirVal;
+
+            closeModal('modal-custom');
+            goToStep(4);
+            generateScannedLocusPoints();
+            renderScene();
+        }
+
+        // Mini Quiz Setup
+        const quizList = [
+            {
+                q: "1. Định nghĩa Quỹ Tích của Parabol là gì?",
+                opts: [
+                    "Tập hợp các điểm M cách đều tiêu điểm F và đường chuẩn Δ",
+                    "Đồ thị của hàm số bậc hai y = ax² + bx + c",
+                    "Đường cong có hai nhánh đối xứng qua gốc tọa độ",
+                    "Tập hợp các điểm M sao cho MF + d(M,Δ) = 2a"
+                ],
+                ans: 0,
+                exp: "Đúng! Parabol là tập hợp tất cả các điểm M cách đều tiêu điểm F và đường chuẩn Δ."
+            },
+            {
+                q: "2. Điểm cố định F trong định nghĩa parabol được gọi là gì?",
+                opts: ["Đỉnh", "Tiêu điểm", "Tâm đối xứng", "Bán kính qua tiêu"],
+                ans: 1,
+                exp: "Chính xác! F gọi là Tiêu điểm (Focus)."
+            },
+            {
+                q: "3. Trong phương trình chính tắc y² = 2px (p > 0), khoảng cách p gọi là gì?",
+                opts: ["Bán trục lớn", "Tiêu cự", "Tham số tiêu", "Độ dài trục thực"],
+                ans: 2,
+                exp: "Chính xác! p = d(F, Δ) được gọi là Tham số tiêu."
+            },
+            {
+                q: "4. Với parabol y² = 8x, tọa độ tiêu điểm F và phương trình đường chuẩn Δ là gì?",
+                opts: ["F(4,0), Δ: x = -4", "F(2,0), Δ: x = -2", "F(0,2), Δ: y = -2", "F(8,0), Δ: x = -8"],
+                ans: 1,
+                exp: "Đúng! Ta có 2p = 8 ⇒ p = 4 ⇒ p/2 = 2. Vậy F(2,0) và Δ: x = -2."
+            },
+            {
+                q: "5. Khoảng cách từ Đỉnh A(0,0) đến Tiêu điểm F của parabol y² = 2px bằng bao nhiêu?",
+                opts: ["p", "2p", "p/2", "p/4"],
+                ans: 2,
+                exp: "Chính xác! Đỉnh A là trung điểm đoạn vuông góc từ F đến Δ nên AF = p/2."
+            },
+            {
+                q: "6. Tại sao phương trình parabol có dạng y² = 2px lại có trục đối xứng là trục Ox?",
+                opts: [
+                    "Vì ứng với mỗi giá trị x > 0 có 2 giá trị y đối nhau: y = ±√(2px)",
+                    "Do quy ước của hình học đại số",
+                    "Vì tiêu điểm F nằm trên đường thẳng Δ",
+                    "Vì đường chuẩn Δ song song với Ox"
+                ],
+                ans: 0,
+                exp: "Chính xác! Giá trị y² cho ra hai nghiệm y trái dấu có cùng độ lớn, tạo ra tính đối xứng qua Ox."
+            }
+        ];
+
+        function openQuizModal() {
+            openModal('modal-quiz');
+        }
+
+        function initQuizData() {
+            const body = document.getElementById('quiz-body');
+            body.innerHTML = quizList.map((item, qIdx) => `
+                <div class="bg-slate-950 p-4 border border-slate-800 rounded-xl space-y-2">
+                    <p class="font-bold text-slate-100 text-xs">${item.q}</p>
+                    <div class="space-y-1.5">
+                        ${item.opts.map((opt, oIdx) => `
+                            <button onclick="checkQuizAnswer(${qIdx}, ${oIdx})" id="quiz-opt-${qIdx}-${oIdx}" class="w-full text-left p-2 bg-slate-900 border border-slate-800 hover:bg-slate-850 rounded text-xs text-slate-300 transition">
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="quiz-exp-${qIdx}" class="hidden text-xs p-2 rounded font-medium"></div>
+                </div>
+            `).join('');
+        }
+
+        function checkQuizAnswer(qIdx, selectedIdx) {
+            const q = quizList[qIdx];
+            const expDiv = document.getElementById(`quiz-exp-${qIdx}`);
+            expDiv.classList.remove('hidden');
+
+            if (selectedIdx === q.ans) {
+                expDiv.className = "text-xs p-2 rounded bg-emerald-950/50 border border-emerald-800/60 text-emerald-300";
+                expDiv.innerHTML = `✓ ${q.exp}`;
+                document.getElementById(`quiz-opt-${qIdx}-${selectedIdx}`).className = "w-full text-left p-2 bg-emerald-900/40 border border-emerald-500 rounded text-xs text-emerald-200 font-bold";
+            } else {
+                expDiv.className = "text-xs p-2 rounded bg-rose-950/50 border border-rose-800/60 text-rose-300";
+                expDiv.innerHTML = `✕ <strong>Chưa đúng!</strong> Hãy xem lại lý thuyết Quỹ tích ở các bước 1-4.`;
+                document.getElementById(`quiz-opt-${qIdx}-${selectedIdx}`).className = "w-full text-left p-2 bg-rose-900/40 border border-rose-500 rounded text-xs text-rose-200";
+            }
+        }
+    </script>
+</body>
+</html>
